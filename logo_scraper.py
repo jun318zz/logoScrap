@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 import sys
 import re
 import csv
+import time
 
 
 
@@ -125,7 +126,8 @@ def getImgLink2(bsObj):
 
 def getOfficialSiteLogoLinks(data):
 
-    f = open('data.csv', 'a+')
+    file_name = 'data_'+time.strftime("%Y%m%d_%H_%M")+'.csv'
+    f = open(file_name, 'a+')
     writer = csv.writer(f)
 
     for i, row in enumerate(data):

@@ -4,7 +4,7 @@
   1. 링크 주소가 / 인 a 태그 안의 이미지 (getImgLink1)
   2. 이미지 태그의 속성값 중 logo 문자열이 포함된 이미지 (getImgLink2)
 - 결과물
-  1. 파일: data.csv
+  1. 파일: 'data_'+time.strftime("%Y%m%d_%H_%M")+'.csv'
   2. 데이터: name, wikipedia url, wikipedia logo url, official site url, official site logo url
 
 ### Usage
