@@ -152,8 +152,8 @@ def getOfficialSiteLogoLinks(data):
 '''
 final data list values:
 data = [ [name,
-          wiki url,
-          wiki logo url,
+          wikipedia url,
+          wikipedia logo url,
           official site url,
           official site logo url], ... ]
 '''

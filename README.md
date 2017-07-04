@@ -5,7 +5,7 @@
   2. 이미지 태그의 속성값 중 logo 문자열이 포함된 이미지 (getImgLink2)
 - 결과물
   1. 파일: data.csv
-  2. 데이터: name, wiki url, wiki logo url, official site url, official site logo url
+  2. 데이터: name, wikipedia url, wikipedia logo url, official site url, official site logo url
 
 ### Usage
     python3 logo_scraper.py
