@@ -1,6 +1,7 @@
-from urllib.request import urlopen
-from urllib.error import HTTPError, URLError
+#from urllib.request import urlopen
+#from urllib.error import HTTPError, URLError
 from bs4 import BeautifulSoup
+import requests
 import sys
 import re
 import csv
@@ -11,8 +12,11 @@ import time
 def getHtml(url):
 
     try:
-        html = urlopen(url, timeout=3)
-        bsObj = BeautifulSoup(html.read(), "html.parser")
+        #html = urlopen(url, timeout=3)
+        #bsObj = BeautifulSoup(html.read(), "html.parser")
+        html = requests.get(url, timeout=3)
+        bsObj = BeautifulSoup(html.content, "html.parser")
+
     except Exception as e:
         print(e)
         return None
@@ -136,8 +140,8 @@ def getOfficialSiteLogoLinks(data):
         img_link = 'N'
         funcs = (getImgLink1, getImgLink2)
 
-        for f in funcs:
-            link = f(bsObj)
+        for func in funcs:
+            link = func(bsObj)
             if link != None:
                 img_link = link
                 break
@@ -150,6 +154,48 @@ def getOfficialSiteLogoLinks(data):
         print("total: {} done: {}".format(len(data), i+1))
 
     f.close()
+
+
+
+def summary(data):
+
+    wikipedia_logo_url = official_site_url = official_site_logo_url = 0
+    names = []
+
+    for row in data:
+        if row[2] != 'N':
+            wikipedia_logo_url += 1
+            if row[4] == 'N':
+                names.append(row[0])
+
+        if row[3] != 'N':
+            official_site_url += 1
+
+        if row[4] != 'N':
+            official_site_logo_url += 1
+
+    print("\n[ Summary ]")
+    print("* Toral rows: {}".format(len(data)))
+
+    print("- wikipedia_logo_url")
+    print("  number of url: {}".format(wikipedia_logo_url))
+    print("  number of N: {}\n".format(total - wikipedia_logo_url))
+
+    print("- official_site_url")
+    print("  number of url: {}".format(official_site_url))
+    print("  number of N: {}\n".format(total - official_site_url))
+
+    print("- official_site_logo_url")
+    print("  number of url: {}".format(official_site_logo_url))
+    print("  number of N: {}\n".format(total - official_site_logo_url))
+
+    print("- wikipedia_logo_url exists, but official_site_logo_url is 'N'")
+    print("  number: {}".format(len(names)))
+    print("  data: {}\n".format(names))
+
+
+
+
 
 '''
 final data list values:
@@ -165,3 +211,4 @@ if __name__ == "__main__":
     getWikiLinks(data)
     getWikiWebSiteLogoLinks(data)
     getOfficialSiteLogoLinks(data)
+    summary(data)

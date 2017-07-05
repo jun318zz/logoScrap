@@ -6,6 +6,8 @@
 - 결과물
   1. 파일: 'data_'+time.strftime("%Y%m%d_%H_%M")+'.csv'
   2. 데이터: name, wikipedia url, wikipedia logo url, official site url, official site logo url
-
+- 추가 설치 패키지
+  1. pip install requests[security]
+   
 ### Usage
     python3 logo_scraper.py
