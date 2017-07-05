@@ -14,7 +14,7 @@ def getHtml(url):
     try:
         #html = urlopen(url, timeout=3)
         #bsObj = BeautifulSoup(html.read(), "html.parser")
-        html = requests.get(url, timeout=3)
+        html = requests.get(url, timeout=3, verify=False)
         bsObj = BeautifulSoup(html.content, "html.parser")
 
     except Exception as e:
@@ -67,6 +67,7 @@ def getWikiWebSiteLogoLinks(data):
             #print("loop:{}, message:{}".format(i, e))
             pass
         finally:
+            wiki_img_url = re.sub(r'^//','https://', wiki_img_url)
             row.append(wiki_img_url)
 
         # 우측 정보 테이블 내 Website 링크(공식사이트)
@@ -76,6 +77,7 @@ def getWikiWebSiteLogoLinks(data):
             #print(i, e)
             pass
         finally:
+            official_url = re.sub(r'^//','https://', official_url)
             row.append(official_url)
 
         print("== getWikiWebSiteLogoLinks ... ==")
