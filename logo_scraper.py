@@ -78,7 +78,7 @@ def getWikiWebSiteLogoLinks(data):
         finally:
             row.append(official_url)
 
-        print("== getWebSiteLogoLinks ... ==")
+        print("== getWikiWebSiteLogoLinks ... ==")
         print(row)
         print("total: {} done: {}".format(len(data), i+1))
 
@@ -118,7 +118,10 @@ def getImgLink2(bsObj):
                 attr_str = " ".join(attr_list)
 
             if re.search("logo", attr_str) is not None:
-                return img.attrs["src"]
+                if 'src' not in img.attrs.keys():
+                    return img.attrs["srcset"].split(',')[0]
+                else:
+                    return img.attrs["src"]
 
     except AttributeError as e:
         #print("loop:{}, message:{}".format(i, e))
@@ -161,6 +164,7 @@ def summary(data):
 
     wikipedia_logo_url = official_site_url = official_site_logo_url = 0
     names = []
+    total = len(data)
 
     for row in data:
         if row[2] != 'N':
@@ -175,7 +179,7 @@ def summary(data):
             official_site_logo_url += 1
 
     print("\n[ Summary ]")
-    print("* Toral rows: {}".format(len(data)))
+    print("* Toral rows: {}".format(total))
 
     print("- wikipedia_logo_url")
     print("  number of url: {}".format(wikipedia_logo_url))
