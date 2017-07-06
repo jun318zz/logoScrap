@@ -40,13 +40,15 @@ def getWikiLinks(data):
         return None
 
     print("== getWikiLinks ... ==")
-    print("total: {}".format(len(data)))
+    print("total: {}\n".format(len(data)))
 
 
 
 def getWikiWebSiteLogoLinks(data):
 
     for i, row in enumerate(data):
+
+        print("== getWikiWebSiteLogoLinks ... ==")
 
         wiki_img_url = official_url = 'N'
         bsObj = getHtml("https://en.wikipedia.org"+row[1])
@@ -80,9 +82,8 @@ def getWikiWebSiteLogoLinks(data):
             official_url = re.sub(r'^//','https://', official_url)
             row.append(official_url)
 
-        print("== getWikiWebSiteLogoLinks ... ==")
         print(row)
-        print("total: {} done: {}".format(len(data), i+1))
+        print("total: {} done: {}\n".format(len(data), i+1))
 
 
 
@@ -141,6 +142,8 @@ def getOfficialSiteLogoLinks(data):
 
     for i, row in enumerate(data):
 
+        print("== getOfficialSiteLogoLinks ... ==")
+
         bsObj = getHtml(row[3])
         img_link = 'N'
         funcs = (getImgLink1, getImgLink2)
@@ -152,11 +155,10 @@ def getOfficialSiteLogoLinks(data):
                 break
 
         row.append(img_link)
-
-        print("== getOfficialSiteLogoLinks ... ==")
         writer.writerow(row)
+
         print(row)
-        print("total: {} done: {}".format(len(data), i+1))
+        print("total: {} done: {}\n".format(len(data), i+1))
 
     f.close()
 
@@ -169,35 +171,33 @@ def summary(data):
     total = len(data)
 
     for row in data:
-        if row[2] != 'N':
-            wikipedia_logo_url += 1
-            if row[4] == 'N':
-                names.append(row[0])
 
-        if row[3] != 'N':
-            official_site_url += 1
+        if row[2] != 'N': wikipedia_logo_url += 1
+        if row[3] != 'N': official_site_url += 1
+        if row[4] != 'N': official_site_logo_url += 1
 
-        if row[4] != 'N':
-            official_site_logo_url += 1
+        # 추가로 점검할 조건
+        if row[2] != 'N' and row[3] != 'N' and row[4] == 'N':
+            names.append(row[0])
 
     print("\n[ Summary ]")
-    print("* Toral rows: {}".format(total))
+    print("* toral rows: {}".format(total))
 
-    print("- wikipedia_logo_url")
-    print("  number of url: {}".format(wikipedia_logo_url))
-    print("  number of N: {}\n".format(total - wikipedia_logo_url))
+    print("* wikipedia_logo_url (row[2])")
+    print("  - exist: {}".format(wikipedia_logo_url))
+    print("  - exist(N): {}\n".format(total - wikipedia_logo_url))
 
-    print("- official_site_url")
-    print("  number of url: {}".format(official_site_url))
-    print("  number of N: {}\n".format(total - official_site_url))
+    print("* official_site_url (row[3])")
+    print("  - exist: {}".format(official_site_url))
+    print("  - no exist(N): {}\n".format(total - official_site_url))
 
-    print("- official_site_logo_url")
-    print("  number of url: {}".format(official_site_logo_url))
-    print("  number of N: {}\n".format(total - official_site_logo_url))
+    print("* official_site_logo_url (row[4])")
+    print("  - exist: {}".format(official_site_logo_url))
+    print("  - no exist(N): {}\n".format(total - official_site_logo_url))
 
-    print("- wikipedia_logo_url exists, but official_site_logo_url is 'N'")
-    print("  number: {}".format(len(names)))
-    print("  data: {}\n".format(names))
+    print("* to check (wikipedia_logo_url, official_site_url exist, but official_site_logo_url is 'N')")
+    print("  - count: {}".format(len(names)))
+    print("  - data: {}\n".format(names))
 
 
 
