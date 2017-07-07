@@ -80,6 +80,7 @@ def getWikiWebSiteLogoLinks(data):
             pass
         finally:
             official_url = re.sub(r'^//','https://', official_url)
+            official_url = re.sub(r'/$', '', official_url)
             row.append(official_url)
 
         print(row)
@@ -136,8 +137,8 @@ def getImgLink2(bsObj):
 
 def getOfficialSiteLogoLinks(data):
 
-    file_name = 'data_'+time.strftime("%Y%m%d_%H_%M")+'.csv'
-    f = open(file_name, 'a+')
+    file_name = 'data_'+time.strftime("%Y%m%d_%H_%M")
+    f = open(file_name+".csv", 'a+')
     writer = csv.writer(f)
 
     for i, row in enumerate(data):
@@ -154,6 +155,9 @@ def getOfficialSiteLogoLinks(data):
                 img_link = link
                 break
 
+        if re.search('^http', img_link) is None and img_link[0] != '/':
+            img_link = '/'+img_link
+
         row.append(img_link)
         writer.writerow(row)
 
@@ -161,6 +165,23 @@ def getOfficialSiteLogoLinks(data):
         print("total: {} done: {}\n".format(len(data), i+1))
 
     f.close()
+
+    makeHtml(data, file_name)
+
+
+
+def makeHtml(data, file_name):
+
+    html = \
+    '''
+    <h3>{}</h3>
+    <img src="{}{}">
+    <hr>
+    '''
+
+    with open(file_name+".html", 'a+') as f:
+        for row in data:
+            f.write(html.format(row[0]), row[3], row[4])
 
 
 
