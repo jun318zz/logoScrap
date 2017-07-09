@@ -69,6 +69,7 @@ def getWikiWebSiteLogoLinks(data):
             #print("loop:{}, message:{}".format(i, e))
             pass
         finally:
+            wiki_img_url = re.sub(r'^//','https://', wiki_img_url)
             row.append(wiki_img_url)
 
         # 우측 정보 테이블 내 Website 링크(공식사이트)
@@ -78,6 +79,8 @@ def getWikiWebSiteLogoLinks(data):
             #print(i, e)
             pass
         finally:
+            official_url = re.sub(r'^//','https://', official_url)
+            official_url = re.sub(r'/$', '', official_url)
             row.append(official_url)
 
         print(row)
@@ -134,10 +137,6 @@ def getImgLink2(bsObj):
 
 def getOfficialSiteLogoLinks(data):
 
-    file_name = 'data_'+time.strftime("%Y%m%d_%H_%M")
-    f = open(file_name+".csv", 'a+')
-    writer = csv.writer(f)
-
     for i, row in enumerate(data):
 
         print("== getOfficialSiteLogoLinks ... ==")
@@ -153,32 +152,29 @@ def getOfficialSiteLogoLinks(data):
                 break
 
         row.append(img_link)
-        writer.writerow(row)
 
         print(row)
         print("total: {} done: {}\n".format(len(data), i+1))
-
-    f.close()
-
-    postProcess(data)
-    makeHtml(data, file_name)
 
 
 
 def postProcess(data):
 
+    file_name = 'data_'+time.strftime("%Y%m%d_%H_%M")
+    f = open(file_name+".csv", 'a+')
+    writer = csv.writer(f)
+
     for row in data:
+        if (row[4] != 'N' and
+            re.search('^http', row[4]) == None and
+            row[4][0] != '/'):
 
-        if row[2] != 'N':
-            row[2] = re.sub(r'^//','https://', row[2])
+            row[4] = '/'+row[4]
 
-        if row[3] != 'N':
-            row[3] = re.sub(r'^//','https://', row[3])
-            row[3] = re.sub(r'/$', '', row[3])
+        writer.writerow(row)
 
-        if row[4] != 'N':
-            if re.search('^http', row[4]) is None and row[4][0] != '/':
-                row[4] = '/'+row[4]
+    f.close()
+    makeHtml(data, file_name)
 
 
 
@@ -193,6 +189,9 @@ def makeHtml(data, file_name):
 
     with open(file_name+".html", 'a+') as f:
         for row in data:
+            if row[4] == 'N':
+                continue
+
             if re.search('^http', row[4]):
                 src = row[4]
             else:
@@ -255,4 +254,5 @@ if __name__ == "__main__":
     getWikiLinks(data)
     getWikiWebSiteLogoLinks(data)
     getOfficialSiteLogoLinks(data)
+    postProcess(data)
     summary(data)
