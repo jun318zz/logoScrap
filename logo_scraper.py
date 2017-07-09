@@ -69,7 +69,6 @@ def getWikiWebSiteLogoLinks(data):
             #print("loop:{}, message:{}".format(i, e))
             pass
         finally:
-            wiki_img_url = re.sub(r'^//','https://', wiki_img_url)
             row.append(wiki_img_url)
 
         # 우측 정보 테이블 내 Website 링크(공식사이트)
@@ -79,8 +78,6 @@ def getWikiWebSiteLogoLinks(data):
             #print(i, e)
             pass
         finally:
-            official_url = re.sub(r'^//','https://', official_url)
-            official_url = re.sub(r'/$', '', official_url)
             row.append(official_url)
 
         print(row)
@@ -155,9 +152,6 @@ def getOfficialSiteLogoLinks(data):
                 img_link = link
                 break
 
-        if re.search('^http', img_link) is None and img_link[0] != '/':
-            img_link = '/'+img_link
-
         row.append(img_link)
         writer.writerow(row)
 
@@ -166,7 +160,25 @@ def getOfficialSiteLogoLinks(data):
 
     f.close()
 
+    postProcess(data)
     makeHtml(data, file_name)
+
+
+
+def postProcess(data):
+
+    for row in data:
+
+        if row[2] != 'N':
+            row[2] = re.sub(r'^//','https://', row[2])
+
+        if row[3] != 'N':
+            row[3] = re.sub(r'^//','https://', row[3])
+            row[3] = re.sub(r'/$', '', row[3])
+
+        if row[4] != 'N':
+            if re.search('^http', row[4]) is None and row[4][0] != '/':
+                row[4] = '/'+row[4]
 
 
 
@@ -175,13 +187,18 @@ def makeHtml(data, file_name):
     html = \
     '''
     <h3>{}</h3>
-    <img src="{}{}">
+    <img src="{}">
     <hr>
     '''
 
     with open(file_name+".html", 'a+') as f:
         for row in data:
-            f.write(html.format(row[0]), row[3], row[4])
+            if re.search('^http', row[4]):
+                src = row[4]
+            else:
+                src = row[3]+row[4]
+
+            f.write(html.format(row[0], src))
 
 
 
