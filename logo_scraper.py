@@ -184,6 +184,10 @@ def makeHtml(data, file_name):
     '''
     <h3>{}</h3>
     <img src="{}">
+    <ul>
+        <li><a href="{}">wikipedia</a></li>
+        <li><a href="{}">officail site</a></li>
+    </ul>
     <hr>
     '''
 
@@ -197,7 +201,7 @@ def makeHtml(data, file_name):
             else:
                 src = row[3]+row[4]
 
-            f.write(html.format(row[0], src))
+            f.write(html.format(row[0], src, row[1], row[3]))
 
 
 
