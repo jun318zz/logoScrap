@@ -151,6 +151,7 @@ def getOfficialSiteLogoLinks(data):
                 img_link = link
                 break
 
+        img_link = re.sub(r'^//','https://', img_link)
         row.append(img_link)
 
         print(row)
