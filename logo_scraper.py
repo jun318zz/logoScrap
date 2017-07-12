@@ -12,27 +12,33 @@ import time
 
 def getHtml(url):
 
+    data = {'obj': None, 'resp_url': None}
+
     if url == 'N':
-        return None
+        return data
 
     try:
         #html = urlopen(url, timeout=3)
         #bsObj = BeautifulSoup(html.read(), "html.parser")
-        html = requests.get(url, timeout=3, verify=False)
-        bsObj = BeautifulSoup(html.content, "html.parser")
+
+        response = requests.get(url, timeout=3, verify=False)
+        data['obj'] = BeautifulSoup(response.content, "html.parser")
+
+        # 리다이렉트되었을 경우를 위해 저장
+        data['resp_url'] = response.url
 
     except Exception as e:
         print(e)
-        return None
 
-    return bsObj
+    finally:
+        return data
 
 
 
 def getWikiLinks(data):
 
     url = "https://en.wikipedia.org/wiki/List_of_programming_languages"
-    bsObj = getHtml(url)
+    bsObj = getHtml(url)['obj']
 
     try:
         divs = bsObj.findAll("div", {"class":"div-col columns column-count column-count-2"})
@@ -55,7 +61,7 @@ def getWikiWebSiteLogoLinks(data):
         print("== getWikiWebSiteLogoLinks ... ==")
 
         wiki_img_url = official_url = 'N'
-        bsObj = getHtml("https://en.wikipedia.org"+row[1])
+        bsObj = getHtml("https://en.wikipedia.org"+row[1])['obj']
 
         # 우측 정보 테이블
         try:
@@ -91,12 +97,14 @@ def getWikiWebSiteLogoLinks(data):
 
 
 
-def getImgLink1(bsObj):
+def getImgLink1(bsObj, home_url):
 
     # 링크 주소가 / 인 a 태그 안의 이미지
     try:
         a_tags = bsObj.findAll("a", href="/")
-        for a in a_tags:
+        a_tags2 = bsObj.findAll("a", href=re.compile(home_url))
+
+        for a in a_tags.extend(a_tags2):
             if a.img is not None:
                 return a.img.attrs["src"]
 
@@ -108,7 +116,7 @@ def getImgLink1(bsObj):
 
 
 
-def getImgLink2(bsObj):
+def getImgLink2(bsObj, *args):
 
     # 이미지 태그의 속성값 중 logo가 포함된 이미지
     try:
@@ -144,12 +152,17 @@ def getOfficialSiteLogoLinks(data):
 
         print("== getOfficialSiteLogoLinks ... ==")
 
-        bsObj = getHtml(row[3])
+        result = getHtml(row[3])
+        bsObj = result['obj']
+
         img_link = 'N'
         funcs = (getImgLink1, getImgLink2)
 
+        if row[3] != 'N':
+            row[3] = result['resp_url']
+
         for func in funcs:
-            link = func(bsObj)
+            link = func(bsObj, row[3])
             if link != None:
                 img_link = link
                 break
@@ -165,7 +178,10 @@ def postProcess(data):
 
     file_name = 'data_'+time.strftime("%Y%m%d_%H_%M")
     f = open(file_name+".csv", 'a+')
+
     writer = csv.writer(f)
+    writer.writerow(('name','wikipedia url','wikipedia logo url',
+                     'official site url','official site logo url'))
 
     for row in data:
         writer.writerow(row)
