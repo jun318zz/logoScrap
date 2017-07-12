@@ -1,6 +1,7 @@
 #from urllib.request import urlopen
 #from urllib.error import HTTPError, URLError
 from bs4 import BeautifulSoup
+from urllib.parse import urljoin
 import requests
 import sys
 import re
@@ -10,6 +11,9 @@ import time
 
 
 def getHtml(url):
+
+    if url == 'N':
+        return None
 
     try:
         #html = urlopen(url, timeout=3)
@@ -80,7 +84,6 @@ def getWikiWebSiteLogoLinks(data):
             pass
         finally:
             official_url = re.sub(r'^//','https://', official_url)
-            official_url = re.sub(r'/$', '', official_url)
             row.append(official_url)
 
         print(row)
@@ -151,7 +154,6 @@ def getOfficialSiteLogoLinks(data):
                 img_link = link
                 break
 
-        img_link = re.sub(r'^//','https://', img_link)
         row.append(img_link)
 
         print(row)
@@ -166,15 +168,10 @@ def postProcess(data):
     writer = csv.writer(f)
 
     for row in data:
-        if (row[4] != 'N' and
-            re.search('^http', row[4]) == None and
-            row[4][0] != '/'):
-
-            row[4] = '/'+row[4]
-
         writer.writerow(row)
 
     f.close()
+
     makeHtml(data, file_name)
 
 
@@ -197,12 +194,10 @@ def makeHtml(data, file_name):
             if row[4] == 'N':
                 continue
 
-            if re.search('^http', row[4]):
-                src = row[4]
-            else:
-                src = row[3]+row[4]
+            img_src = urljoin(row[3], row[4])
+            wiki_url = urljoin("https://en.wikipedia.org", row[1])
 
-            f.write(html.format(row[0], src, "https://en.wikipedia.org"+row[1], row[3]))
+            f.write(html.format(row[0], img_src, wiki_url, row[3]))
 
 
 
