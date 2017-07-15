@@ -1,7 +1,7 @@
 #from urllib.request import urlopen
 #from urllib.error import HTTPError, URLError
 from bs4 import BeautifulSoup
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
 import requests
 import sys
 import re
@@ -14,8 +14,7 @@ def getHtml(url):
 
     data = {'obj': None, 'resp_url': None}
 
-    if url == 'N':
-        return data
+    if url == 'N': return data
 
     try:
         #html = urlopen(url, timeout=3)
@@ -24,7 +23,7 @@ def getHtml(url):
         response = requests.get(url, timeout=3, verify=False)
         data['obj'] = BeautifulSoup(response.content, "html.parser")
 
-        # 리다이렉트되었을 경우를 위해 저장
+        # url로 접속시 다른 사이트로 리다이렉트되었을 경우를 위해 저장
         data['resp_url'] = response.url
 
     except Exception as e:
@@ -99,28 +98,53 @@ def getWikiWebSiteLogoLinks(data):
 
 def getImgLink1(bsObj, home_url):
 
-    # 링크 주소가 / 인 a 태그 안의 이미지
-    try:
-        a_tags = bsObj.findAll("a", href="/")
-        a_tags2 = bsObj.findAll("a", href=re.compile(home_url))
+    if bsObj == None: return None
 
-        for a in a_tags.extend(a_tags2):
+    o = urlparse(home_url)
+    base = o.scheme + "://" + o.netloc
+
+    # img src case 1:
+    # / or https://www.python.org/ or https://www.python.org
+    # img src case 2:
+    # /index/ or /index or
+    # https://www.python.org/index/ or #https://www.python.org/index
+    if o.path in ('', '/'):
+        regex_list = ['/', base+'/', base]
+    else:
+        path = o.path
+        if o.path[-1] != '/':
+            path += '/'
+        regex_list = [path, path[0:-1], base + path, base + path[0:-1]]
+
+    regex = [ '^' + l + '$' for l in regex_list ]
+
+    try:
+        src = None
+        a_tags2 = bsObj.findAll("a", href=re.compile("|".join(regex)))
+
+        for a in a_tags2:
             if a.img is not None:
-                return a.img.attrs["src"]
+                src = a.img.attrs["src"]
+                break
 
     except AttributeError as e:
         #print("loop:{}, message:{}".format(i, e))
         pass
 
-    return None
+    finally:
+        return src
 
 
 
 def getImgLink2(bsObj, *args):
 
+    if bsObj == None: return None
+
     # 이미지 태그의 속성값 중 logo가 포함된 이미지
     try:
+        src = None
         imgs = bsObj.findAll("img")
+
         for img in imgs:
 
             # 이미지 태그의 모든 속성값 추출
@@ -134,15 +158,17 @@ def getImgLink2(bsObj, *args):
 
             if re.search("logo", attr_str) is not None:
                 if 'src' not in img.attrs.keys():
-                    return img.attrs["srcset"].split(',')[0]
+                    src = img.attrs["srcset"].split(',')[0]
                 else:
-                    return img.attrs["src"]
+                    src = img.attrs["src"]
+                break
 
     except AttributeError as e:
         #print("loop:{}, message:{}".format(i, e))
         pass
 
-    return None
+    finally:
+        return src
 
 
 
@@ -163,6 +189,7 @@ def getOfficialSiteLogoLinks(data):
 
         for func in funcs:
             link = func(bsObj, row[3])
+
             if link != None:
                 img_link = link
                 break
@@ -196,12 +223,12 @@ def makeHtml(data, file_name):
 
     html = \
     '''
-    <h3>{}</h3>
-    <img src="{}">
-    <ul>
-        <li><a href="{}" target="_blank">wikipedia</a></li>
-        <li><a href="{}" target="_blank">official site</a></li>
-    </ul>
+    <h3><a href="{official_site_url}" target="_blank">{name}</a></h3>
+    <li>scrapped image</li>
+    <img src="{scrapped_img_src}">
+
+    <li><a href="{wikipedia_url}" target="_blank">wikipedia</a> image</li>
+    <img src="{wikipedia_img_src}">
     <hr>
     '''
 
@@ -213,7 +240,13 @@ def makeHtml(data, file_name):
             img_src = urljoin(row[3], row[4])
             wiki_url = urljoin("https://en.wikipedia.org", row[1])
 
-            f.write(html.format(row[0], img_src, wiki_url, row[3]))
+            f.write(html.format(official_site_url = row[3],
+                                name = row[0],
+                                scrapped_img_src = img_src,
+                                wikipedia_url = wiki_url,
+                                wikipedia_img_src = row[2]
+                                )
+            )
 
 
 
