@@ -1,3 +1,4 @@
-data*
+*data*
 test*
 _config.yml
+__pycache__/
