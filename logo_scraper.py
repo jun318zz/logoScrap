@@ -45,7 +45,8 @@ class LogoScrap:
 
 
     def mergeFile(self):
-        csv_header = ('name','wikipedia url', 'wikipedia logo url', 'official site url', 'official site logo url')
+        csv_header = ('name','wikipedia url', 'wikipedia logo url',
+                        'official site url', 'official site logo url', 'verified')
         file_name = 'data_'+time.strftime("%Y%m%d_%H_%M")
         files = [data['file'] for data in LogoScrap.thread_check]
 
@@ -253,15 +254,19 @@ class LogoScraper:
 
             self.getWikiWebSiteLogoLinks(temp)
             self.getOfficialSiteLogoLinks(temp)
+            self.verify(temp)
+
             self.writeCSV(temp)
             self.writeHTML(temp)
             self.statistic(temp)
+
             LogoScrap.thread_check[self.instance_num]['done'] = i+1
 
         self.afterJobDone()
 
 
     def afterJobDone(self):
+
         for i in range(2):
             self.fp[i].close()
         LogoScrap.thread_check[self.instance_num]['complete'] = True
@@ -339,6 +344,11 @@ class LogoScraper:
         row.append(img_link)
 
 
+    def verify(self, row):
+
+        row.append('N')
+
+
     def writeCSV(self, row):
 
         writer = csv.writer(self.fp[0])
@@ -373,14 +383,6 @@ class LogoScraper:
 
 
 
-'''
-final data list values:
-data = [ [name,
-          wikipedia url,
-          wikipedia logo url,
-          official site url,
-          official site logo url], ... ]
-'''
 if __name__ == "__main__":
 
     THREAD_NUM = 30
