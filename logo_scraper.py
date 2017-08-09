@@ -22,7 +22,10 @@ class LogoScrap:
 
 
     def __init__(self, number):
-        self.url = "https://en.wikipedia.org/wiki/List_of_programming_languages"
+        self.url = [
+            "https://en.wikipedia.org/wiki/List_of_programming_languages",
+            "https://en.wikipedia.org/wiki/Comparison_of_web_frameworks"
+        ]
         self.thread_num = number
         LogoScrap.thread_check = [None]*number
 
@@ -45,8 +48,7 @@ class LogoScrap:
 
 
     def mergeFile(self):
-        csv_header = ('name','wikipedia url', 'wikipedia logo url',
-                        'official site url', 'official site logo url', 'verified')
+        csv_header = ('name','wikipedia url', 'wikipedia logo url', 'official site url', 'official site logo url', 'verified')
         file_name = 'data_'+time.strftime("%Y%m%d_%H_%M")
         files = [data['file'] for data in LogoScrap.thread_check]
 
@@ -61,16 +63,26 @@ class LogoScrap:
             os.remove(f+'.html')
 
 
-    def getWikiLinks(self):
+    def getWikiLinks(self, opt):
 
         print("== getWikiLinks ... ==")
-        bsObj = LogoScrap.getHtml(self.url)['obj']
+
+        bsObj = LogoScrap.getHtml(self.url[opt])['obj']
 
         try:
-            divs = bsObj.findAll("div", {"class":"div-col columns column-count column-count-2"})
-            for div in divs:
-                for a in div.findAll("a"):
-                    LogoScrap.data.append([a.get_text(), a["href"]])
+            if opt == 0:
+                divs = bsObj.findAll("div", {"class":"div-col columns column-count column-count-2"})
+                for div in divs:
+                    for a in div.findAll("a"):
+                        LogoScrap.data.append([a.get_text(), a["href"]])
+
+            elif opt == 1:
+                th_tags = bsObj.findAll("th", {"class":"table-rh"})
+                for th in th_tags:
+                    data = [th.a.get_text(), th.a["href"]]
+                    if data not in LogoScrap.data:
+                        LogoScrap.data.append(data)
+            #sys.exit()
 
         except AttributeError as e:
             print(e)
@@ -385,9 +397,9 @@ class LogoScraper:
 
 if __name__ == "__main__":
 
-    THREAD_NUM = 30
+    THREAD_NUM = 20
     scrap = LogoScrap(THREAD_NUM)
-    scrap.getWikiLinks()
+    scrap.getWikiLinks(0)
 
     for i in range(THREAD_NUM):
         instance = LogoScraper(i)

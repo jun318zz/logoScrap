@@ -2,3 +2,4 @@
 test*
 _config.yml
 __pycache__/
+*.csv
