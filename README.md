@@ -12,7 +12,7 @@
      pip install requests[security]
   2. 이미지 수집 샘플 페이지 <br>
      https://jun318zz.github.io/logoScrap.html
-  3. 개인사이트(로고 수집) <br>
+  3. heroku 사이트(기술공부, 로고 수집) <br>
      https://jjun.herokuapp.com/logo/
 ### Usage
     python3 logo_scraper.py
