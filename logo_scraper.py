@@ -24,7 +24,9 @@ class LogoScrap:
     def __init__(self, number):
         self.url = [
             "https://en.wikipedia.org/wiki/List_of_programming_languages",
-            "https://en.wikipedia.org/wiki/Comparison_of_web_frameworks"
+            "https://en.wikipedia.org/wiki/Comparison_of_web_frameworks",
+            "https://en.wikipedia.org/wiki/List_of_relational_database_management_systems",
+            "https://en.wikipedia.org/wiki/Comparison_of_structured_storage_software"
         ]
         self.thread_num = number
         LogoScrap.thread_check = [None]*number
@@ -82,6 +84,29 @@ class LogoScrap:
                     data = [th.a.get_text(), th.a["href"]]
                     if data not in LogoScrap.data:
                         LogoScrap.data.append(data)
+
+            elif opt == 2:
+                li_tags = bsObj.find("div", {"class":"div-col columns column-width"}).findAll("li")
+                for li in li_tags:
+                    data = [li.a.get_text(), li.a["href"]]
+                    if data not in LogoScrap.data:
+                        LogoScrap.data.append(data)
+
+            elif opt == 3:
+                tr_tags = bsObj.find("table", {"class":"wikitable sortable"}).findAll("tr")
+                for tr in tr_tags:
+                    td = tr.find("td")
+                    if td == None:
+                        continue
+
+                    a = td.find("a")
+                    if a == None:
+                        continue
+
+                    data = [a.get_text(), a["href"]]
+                    if data not in LogoScrap.data:
+                        LogoScrap.data.append(data)
+
             #sys.exit()
 
         except AttributeError as e:
@@ -115,14 +140,14 @@ class LogoScrap:
             #html = urlopen(url, timeout=3)
             #bsObj = BeautifulSoup(html.read(), "html.parser")
 
-            response = requests.get(url, timeout=3, verify=False)
+            response = requests.get(url, timeout=5, verify=False)
             data['obj'] = BeautifulSoup(response.content, "html.parser")
 
             # url로 접속시 다른 사이트로 리다이렉트되었을 경우를 위해 저장
             data['resp_url'] = response.url
 
         except Exception as e:
-            print(e)
+            print(url, e)
 
         finally:
             return data
@@ -397,9 +422,9 @@ class LogoScraper:
 
 if __name__ == "__main__":
 
-    THREAD_NUM = 20
+    THREAD_NUM = 10
     scrap = LogoScrap(THREAD_NUM)
-    scrap.getWikiLinks(0)
+    scrap.getWikiLinks(3)
 
     for i in range(THREAD_NUM):
         instance = LogoScraper(i)
