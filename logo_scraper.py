@@ -26,7 +26,9 @@ class LogoScrap:
             "https://en.wikipedia.org/wiki/List_of_programming_languages",
             "https://en.wikipedia.org/wiki/Comparison_of_web_frameworks",
             "https://en.wikipedia.org/wiki/List_of_relational_database_management_systems",
-            "https://en.wikipedia.org/wiki/Comparison_of_structured_storage_software"
+            "https://en.wikipedia.org/wiki/Comparison_of_structured_storage_software",
+            "https://en.wikipedia.org/wiki/List_of_JavaScript_libraries",
+            "https://en.wikipedia.org/wiki/Comparison_of_web_server_software"
         ]
         self.thread_num = number
         LogoScrap.thread_check = [None]*number
@@ -101,6 +103,32 @@ class LogoScrap:
 
                     a = td.find("a")
                     if a == None:
+                        continue
+
+                    data = [a.get_text(), a["href"]]
+                    if data not in LogoScrap.data:
+                        LogoScrap.data.append(data)
+
+            elif opt == 4:
+                li_tags = bsObj.find("div", {"class":"mw-parser-output"}).findAll("li")
+                for li in li_tags:
+                    a = li.find("a")
+                    if a == None:
+                        continue
+                    if a.get("href") == None:
+                        continue
+
+                    data = [a.get_text(), a["href"]]
+                    if data not in LogoScrap.data:
+                        LogoScrap.data.append(data)
+
+            elif opt == 5:
+                th_tags = bsObj.findAll("th", attrs={"style":"text-align: left"})
+                for th in th_tags:
+                    a = th.find("a")
+                    if a == None:
+                        continue
+                    if a.get("href") == None:
                         continue
 
                     data = [a.get_text(), a["href"]]
@@ -424,7 +452,7 @@ if __name__ == "__main__":
 
     THREAD_NUM = 10
     scrap = LogoScrap(THREAD_NUM)
-    scrap.getWikiLinks(3)
+    scrap.getWikiLinks(5)
 
     for i in range(THREAD_NUM):
         instance = LogoScraper(i)
